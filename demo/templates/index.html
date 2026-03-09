@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Векторный поиск</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="page">
+    <header class="hero">
+        <h1>Векторный поиск по документам</h1>
+        <p>
+            Поиск работает по лемматизированным TF-IDF векторaм из задания 4
+            и показывает топ-10 результатов по косинусному сходству.
+        </p>
+        <div class="meta">Всего документов в индексе: <strong>{{ documents_count }}</strong></div>
+    </header>
+
+    <section class="search-card">
+        <form method="post" action="/search" class="search-form">
+            <input
+                type="text"
+                name="query"
+                value="{{ query }}"
+                placeholder="Введите запрос, например: банан арахис"
+                autocomplete="off"
+                required
+            >
+            <button type="submit">Искать</button>
+        </form>
+
+        {% if query %}
+            <div class="query-info">
+                <div><strong>Запрос:</strong> {{ query }}</div>
+                <div>
+                    <strong>После лемматизации:</strong>
+                    {% if normalized_query %}
+                        {{ normalized_query | join(', ') }}
+                    {% else %}
+                        запрос не удалось обработать
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </section>
+
+    {% if query %}
+        <section class="results">
+            <div class="results-header">
+                <h2>Результаты</h2>
+                <span>Найдено: {{ results_count }}</span>
+            </div>
+
+            {% if results %}
+                <ol class="results-list">
+                    {% for item in results %}
+                        <li class="result-card">
+                            <div class="result-top">
+                                <div>
+                                    <div class="doc-title">Документ {{ item.doc_id }}</div>
+                                    {% if item.url %}
+                                        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.url }}</a>
+                                    {% else %}
+                                        <span class="muted">Ссылка не найдена в task1/index.txt</span>
+                                    {% endif %}
+                                </div>
+                                <div class="score">{{ '%.6f' | format(item.score) }}</div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ol>
+            {% else %}
+                <div class="empty">По этому запросу ничего не найдено.</div>
+            {% endif %}
+        </section>
+    {% endif %}
+</div>
+</body>
+</html>
